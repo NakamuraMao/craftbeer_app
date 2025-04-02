@@ -1,0 +1,52 @@
+<?php
+
+class Model_Beer extends \Orm\Model
+{
+    protected static $_table_name = 'beers';
+
+    protected static $_primary_key = ['id'];
+
+    protected static $_properties = [
+        'id',
+        'user_id',
+        'name',
+        'brewery',
+        'type',
+        'IBU',
+        'ABV',
+        'origin',
+        'sampled_date',
+        'appearance',
+        'aroma',
+        'taste',
+        'mouthfeel',
+        'overall',
+        'image_url',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    protected static $_observers = [
+        'Orm\\Observer_CreatedAt' => [
+            'events' => ['before_insert'],
+            'property' => 'created_at',
+            'mysql_timestamp' => true,
+        ],
+        'Orm\\Observer_UpdatedAt' => [
+            'events' => ['before_update'],
+            'property' => 'updated_at',
+            'mysql_timestamp' => true,
+        ],
+    ];
+
+    protected static $_belongs_to = [
+        'user' => [
+            'key_from'       => 'user_id',
+            'model_to'       => 'Model_User',
+            'key_to'         => 'id',
+            'cascade_save'   => false,
+            'cascade_delete' => false,
+        ],
+    ];
+}
