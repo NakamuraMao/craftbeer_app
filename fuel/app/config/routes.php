@@ -39,6 +39,21 @@ return array(
 	 */
 
 	//'hello(/:name)?' => array('welcome/hello', 'name' => 'hello'),
-	'api/beer'        => 'api/beer',
-    'api/beer/(:num)' => 'api/beer', // delete_index($id)など
+
+
+		// UIページ（HTML）
+	'login' => 'userPage/login',
+	'register' => 'userPage/register',
+	'logout' => 'userPage/logout',
+
+	// APIエンドポイント
+	'api/user/login'    => 'api/user/login',
+	'api/user/register' => 'api/user/register',
+
+	'api/beer'        => 'api/beerController',
+	'api/beer/:id' => 'api/beerController/index/$1',
+
+
+
+
 );

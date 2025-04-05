@@ -1,6 +1,6 @@
 <?php
 
-class Model_Beers_Archives extends \Orm\Model
+class Model_BeerArchive extends \Orm\Model
 {
     // テーブル名を明示
     protected static $_table_name = 'beers_archives';
@@ -11,6 +11,7 @@ class Model_Beers_Archives extends \Orm\Model
     // テーブルのカラム一覧
     protected static $_properties = [
         'id',
+        'beer_id',
         'user_id',
         'name',
         'brewery',
@@ -53,5 +54,13 @@ class Model_Beers_Archives extends \Orm\Model
             'cascade_save' => false,
             'cascade_delete' => false,
         ],
+
+        'beer' => [
+        'key_from' => 'beer_id',
+        'model_to' => 'Model_Beer',
+        'key_to' => 'id',
+        'cascade_save' => false,
+        'cascade_delete' => false,
+    ],
     ];
 }

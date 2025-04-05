@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Your Craft Beer History</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.min.js"></script>
-    <script src="/assets/js/listBeer.js"></script>
     <style>
         img { max-height: 100px; margin-right: 10px; }
         li { margin-bottom: 20px; }
@@ -12,6 +10,8 @@
 </head>
 <body>
     <h1>🍺 Your Craft Beer History</h1>
+    <button onclick="location.href='/beer/create'" style="margin-bottom: 20px;">＋ Create new craftbeer</button>
+    <button onclick="location.href='/logout'">Logout</button>
 
     <!-- Beer List -->
     <ul data-bind="foreach: beers">
@@ -33,9 +33,12 @@
             Taste: <span data-bind="text: taste"></span> /
             Mouthfeel: <span data-bind="text: mouthfeel"></span> /
             <strong>Overall: <span data-bind="text: overall"></span></strong><br>
-
+            <a data-bind="attr: { href: '/beer/detail?id=' + id }" class="detail-button">Details</a>
             <button data-bind="click: $parent.deleteBeer">Delete</button>
         </li>
     </ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.min.js"></script>
+    <script src="/assets/js/listBeer.js"></script>
 </body>
 </html>

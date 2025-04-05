@@ -19,18 +19,19 @@
  *
  */
 
+
  return array(
     'default' => array(
-        'type'           => 'pdo', 
+        'type'           => 'pdo',
         'connection'     => array(
             'dsn'        => 'mysql:host=localhost;dbname=craftbeer_db',
             'username'   => 'root',
-            'password'   => 'qaz531PLM!',
-            'persistent' => false,
+            'password'   => 'apu2004APU!',
         ),
-        'charset'        => 'utf8',
+        'identifier'     => '`',
         'table_prefix'   => '',
-        'caching'        => false,
+        'charset'        => 'utf8',
+        'enable_cache'   => true,
         'profiling'      => true,
     ),
 );

@@ -40,6 +40,16 @@ class Model_Beer extends \Orm\Model
         ],
     ];
 
+    protected static $_has_many = [
+        'archives' => [
+            'key_from' => 'id',
+            'model_to' => 'Model_BeerArchive',
+            'key_to' => 'beer_id',
+            'cascade_save' => false,
+            'cascade_delete' => false,
+        ],
+    ];
+
     protected static $_belongs_to = [
         'user' => [
             'key_from'       => 'user_id',
@@ -48,5 +58,7 @@ class Model_Beer extends \Orm\Model
             'cascade_save'   => false,
             'cascade_delete' => false,
         ],
+
+
     ];
 }

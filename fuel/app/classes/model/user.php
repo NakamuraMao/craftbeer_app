@@ -36,5 +36,13 @@ class Model_User extends \Orm\Model
             'cascade_save' => false,
             'cascade_delete' => false,
         ],
+
+        'beer_archives' => [
+            'key_from' => 'id',
+            'model_to' => 'Model_BeerArchive',
+            'key_to' => 'user_id',
+            'cascade_save' => false,
+            'cascade_delete' => false,
+        ],
     ];
 }
