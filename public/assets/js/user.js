@@ -16,7 +16,8 @@ function UserViewModel(){
         const payload = {
             username: self.registerUsername(),
             email: self.registerEmail(),
-            password: self.registerPassword()
+            password: self.registerPassword(),
+            csrf_token: CSRF_TOKEN 
         };
 
         fetch('/api/user/register', {
@@ -44,14 +45,15 @@ function UserViewModel(){
     };
 
 
-    self.loginEmail = ko.observable('');
+    self.loginEmail = ko.observable(typeof REMEMBERED_EMAIL !== 'undefined' ? REMEMBERED_EMAIL : '');
     self.loginPassword = ko.observable('');
     self.loginMessage = ko.observable('');
 
     self.login = function(){
         const payload = {
             email: self.loginEmail(),
-            password: self.loginPassword()
+            password: self.loginPassword(),
+            csrf_token: CSRF_TOKEN
         };
 
         fetch('/api/user/login', {

@@ -2,13 +2,12 @@
 
 class Model_BeerArchive extends \Orm\Model
 {
-    // テーブル名を明示
+    //テーブル名
     protected static $_table_name = 'beers_archives';
 
-    // 主キー
     protected static $_primary_key = ['id'];
 
-    // テーブルのカラム一覧
+    // カラム一覧
     protected static $_properties = [
         'id',
         'beer_id',
@@ -31,7 +30,7 @@ class Model_BeerArchive extends \Orm\Model
         'updated_at',
     ];
 
-    // 自動的に created_at, updated_at を更新
+    // 自動で日付を更新
     protected static $_observers = [
         'Orm\\Observer_CreatedAt' => [
             'events' => ['before_insert'],
@@ -45,8 +44,9 @@ class Model_BeerArchive extends \Orm\Model
         ],
     ];
 
-    // 関連ユーザー（1:n リレーション）
+    
     protected static $_belongs_to = [
+        // ビールアーカイブは一人のユーザーに属する
         'user' => [
             'key_from' => 'user_id',
             'model_to' => 'Model_User',
@@ -54,7 +54,7 @@ class Model_BeerArchive extends \Orm\Model
             'cascade_save' => false,
             'cascade_delete' => false,
         ],
-
+        // ビールアーカイブは一つのビールに属する
         'beer' => [
         'key_from' => 'beer_id',
         'model_to' => 'Model_Beer',

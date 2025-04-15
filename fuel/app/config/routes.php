@@ -18,7 +18,7 @@ return array(
 	 *
 	 */
 
-	'_root_' => 'beer/index',
+	'_root_' => 'userPage/login',
 
 	/**
 	 * -------------------------------------------------------------------------
@@ -41,7 +41,7 @@ return array(
 	//'hello(/:name)?' => array('welcome/hello', 'name' => 'hello'),
 
 
-		// UIページ（HTML）
+	// UIページ（HTML）
 	'login' => 'userPage/login',
 	'register' => 'userPage/register',
 	'logout' => 'userPage/logout',

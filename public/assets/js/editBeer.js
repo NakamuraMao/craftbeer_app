@@ -1,6 +1,6 @@
 function BeerFormViewModel() {
     this.id = ko.observable();
-    this.user_id = ko.observable();
+    //this.user_id = ko.observable(LOGGED_IN_USER_ID);
     this.name = ko.observable("");
     this.brewery = ko.observable("");
     this.type = ko.observable("");
@@ -26,7 +26,7 @@ function BeerFormViewModel() {
         },
         owner: this
     });
-
+//APUで取得したデータをViewModelに代入するメソッド
     this.loadFromData = function (data) {
         this.id(data.id);
         this.name(data.name);
@@ -42,10 +42,10 @@ function BeerFormViewModel() {
         this.mouthfeel(data.mouthfeel);
         this.overall(data.overall);
         this.image_url(data.image_url);
-        if (data.user_id) this.user_id(data.user_id);
+        //this.user_id(data.user_id);
     };
 }
-
+//フォームが送信された時に呼ばれる関数
 BeerFormViewModel.prototype.submitForm = function () {
     const beerData = {
         id: this.id(),
@@ -62,17 +62,18 @@ BeerFormViewModel.prototype.submitForm = function () {
         mouthfeel: this.mouthfeel(),
         overall: this.overall(),
         image_url: this.image_url(),
-        user_id: this.user_id()
+        //user_id: this.user_id(),
+        csrf_token: CSRF_TOKEN// CSRF対策トークン
     };
-
+//PUTメソッドでビールデータを更新するAPIへリクエスト送信
     fetch('/api/beer', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(beerData)
+        body: JSON.stringify(beerData)//JSONに変換
     })
-        .then(res => res.json())
+        .then(res => res.json())//responseをJSONに変換
         .then(data => {
             if (data.success) {
                 alert("Completed!");
@@ -86,7 +87,7 @@ BeerFormViewModel.prototype.submitForm = function () {
             console.error(err);
         });
 };
-
+//HTMLが完全に読み込まれたら実行される関数
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     const beerId = params.get("id");
@@ -98,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const vm = new BeerFormViewModel();
 
-    fetch(`/api/beer?id=${beerId}`)
+    fetch(`/api/beer/${beerId}`)
         .then(res => res.json())
         .then(data => {
             vm.loadFromData(data);

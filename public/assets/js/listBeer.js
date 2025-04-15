@@ -1,3 +1,4 @@
+//一つのビール情報を表すモデル（個別データ）
 function BeerModel(data) {
     this.id = data.id;
     this.name = ko.observable(data.name);
@@ -14,7 +15,7 @@ function BeerModel(data) {
     this.overall = ko.observable(data.overall);
     this.image_url = ko.observable(data.image_url);
 }
-
+//ビールのリスト全体を管理　ViewModel(画面全体)
 function BeerListViewModel() {
     const self = this;
 
@@ -25,14 +26,15 @@ function BeerListViewModel() {
     //self.newBrewery = ko.observable('');
 
     // 初期データの読み込み
+    //ビール一覧をAPIから取得して配列にセットする関数
     self.loadBeers = function () {
         //const currentUserId = localStorage.getItem('user_id');
 
         fetch(`/api/beer`)
             .then(res => res.json())
             .then(data => {
-                const mapped = data.map(item => new BeerModel(item));
-                self.beers(mapped);
+                const mapped = data.map(item => new BeerModel(item));//各アイテムをBeerModelに変換してKnockout用にする
+                self.beers(mapped);//beers配列にセットして画面に反映
             })
             .catch(err => console.error('error:', err));
     };
@@ -64,14 +66,18 @@ function BeerListViewModel() {
         if (!confirm(`You would like to delete ${beer.name()}?`)) {
             return;
         }
-    
+        //ビールのIDをURLに指定してDELETEをリクエストする
         fetch(`/api/beer/${beer.id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN }) // CSRF対策トークンを送信
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                self.beers.remove(beer);
+                self.beers.remove(beer);// 成功したらbeers配列から該当のBeerを削除（画面からも消える）
                 alert('Success to delete!');
             } else {
                 alert('Failed to delete...');
@@ -83,7 +89,7 @@ function BeerListViewModel() {
             console.error(err);
         });
     };
-
+    //ページ読み込み時にビール一覧を取得して表示
     self.loadBeers(); // 初期化時に呼ぶ
 
 }

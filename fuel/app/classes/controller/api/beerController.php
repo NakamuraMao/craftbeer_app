@@ -1,37 +1,42 @@
 <?php
 
-
-
 use Fuel\Core\Controller_Rest;
 //use Model_Beer;
 use \Fuel\Core\Input;
 use \Fuel\Core\Session;
+use \Fuel\Core\Security;
 //use Model_BeerArchive;
 
 class Controller_Api_beerController extends Controller_Rest
 {
+	//json形式
 	protected $format = 'json';
 
+	//一覧表示用
+	//$id = null : 一覧表示
 	public function get_index($id = null)
 	{
-		$id = $id ?: Input::get('id');
+		//$id = $id ?: Input::get('id');
+		// セッション:ログイン中のユーザーIDを取得
 		$user_id = Session::get('user_id');
 		//$user_id = Input::get('user_id');
 
 		if(!$user_id){
 			return $this->response(['error' => 'Not logged in'], 401);
 		}
-
+		//ビールidがある時　= 詳細表示
 		if($id){
+			// findメソッド IDでビール情報を一つ取得
 			$beer = Model_Beer::find($id);
 
-			if(!$beer || $beer->deleted_at !== null){
+			if(!$beer || $beer->deleted_at !== null || $beer->user_id != Session::get('user_id')){
 				return $this->response(['error' => 'Beer not found'], 404);
 			}
 		
-
+			//1つのビールの詳細データ
 			return $this->response([
 				'id' => $beer->id,
+				'user_id' => $beer->user_id,
 				'name' => $beer->name,
 				'brewery' => $beer->brewery,
 				'type' => $beer->type,
@@ -52,19 +57,21 @@ class Controller_Api_beerController extends Controller_Rest
 		}
 	
 
-
-		// deleted_at が null のビールのみ取得（論理削除されてないもの）
+		//一覧取得
+		// deleted_at が null のビール & user idがdbのuser idと一致
     	$beers = Model_Beer::find('all', [
             'where' => [
 				['deleted_at', 'IS', null],
 				['user_id', '=', $user_id],
 			]
         ]);
-
+		//各ビールデータを配列に格納　JSON形式で返すために
 		$result = [];
         foreach ($beers as $beer) {
             $result[] = [
+				//キー　＝＞　値
                 'id' => $beer->id,
+				'user_id' => $beer->user_id,
                 'name' => $beer->name,
                 'brewery' => $beer->brewery,
                 'type' => $beer->type,
@@ -89,11 +96,17 @@ class Controller_Api_beerController extends Controller_Rest
 	}
 	
 
-
+	//新規登録用
 	public function post_index()
 	{
+		//フロントからのJSONデータを配列で格納する
 		$data = json_decode(file_get_contents('php://input'), true);
 		$user_id = Session::get('user_id');
+
+		//CSRF tokenをチェック
+		if (!Security::check_token(@$data['csrf_token'])) {
+			return $this->response(['error' => 'Invalid CSRF Token'], 403);
+		}
 
 		if(!isset($data['name'], $data['brewery'])){
 			return $this->response(['error' => 'Name and Brewery are required'], 400);
@@ -102,11 +115,13 @@ class Controller_Api_beerController extends Controller_Rest
 		// Ensure sampled_date is in the correct format if it's a string
 		$sampled_date = isset($data['sampled_date']) ? date('Y-m-d', strtotime($data['sampled_date'])) : null;
 
+		//新しいビールデータのモデルインスタンスを作成
 		$beer = Model_Beer::forge([
             //'user_id' => isset($data['user_id']) ? $data['user_id'] : null,  // ユーザーIDがあれば設定
 			'user_id' => $user_id,
             'name' => $data['name'],
             'brewery' => $data['brewery'],  // ブランド名
+			//isset：キーがあるか　$data['']があればその値をセット　なければnull
             'type' => isset($data['type']) ? $data['type'] : null,  // 種類
             'IBU' => isset($data['IBU']) ? $data['IBU'] : null,  // 苦味
             'ABV' => isset($data['ABV']) ? $data['ABV'] : null,  // アルコール度数
@@ -129,25 +144,32 @@ class Controller_Api_beerController extends Controller_Rest
 
 	}
 
-
+	//編集用
 	public function put_index(){
 		$data = json_decode(file_get_contents('php://input'), true);
+
 		$user_id = Session::get('user_id');
+
+		if (!Security::check_token(@$data['csrf_token'])) {
+			return $this->response(['error' => 'Invalid CSRF Token'], 403);
+		}
 
 		if (!isset($data['id'])) {
 			return $this->response(['error' => 'ID is required for update'], 400);
 		}
 	
+		//IDで一つのビールデータを取得
 		$beer = Model_Beer::find($data['id']);
 	
 		if (!$beer || $beer->deleted_at !== null) {
 			return $this->response(['error' => 'Beer not found'], 404);
 		}
-	
+		//DBのuser_idとsessionで取得したログイン中のuser_idを比べる
 		if($beer->user_id !== $user_id){
 			return $this->response(['error' => 'Unauthorized'], 403);
 		}
 		// 値が存在すれば更新
+		//$data['']がnullかどうか　$x がnullなら $y
 		$beer->name         = $data['name'] ?? $beer->name;
 		$beer->brewery      = $data['brewery'] ?? $beer->brewery;
 		$beer->type         = $data['type'] ?? $beer->type;
@@ -161,7 +183,7 @@ class Controller_Api_beerController extends Controller_Rest
 		$beer->mouthfeel    = $data['mouthfeel'] ?? $beer->mouthfeel;
 		$beer->overall      = $data['overall'] ?? $beer->overall;
 		$beer->image_url    = $data['image_url'] ?? $beer->image_url;
-		$beer->user_id      = $data['user_id'] ?? $beer->user_id;
+		//$beer->user_id      = $data['user_id'] ?? $beer->user_id;
 	
 		if ($beer->save()) {
 			return $this->response(['success' => 'Beer successfully updated!'], 200);
@@ -174,6 +196,14 @@ class Controller_Api_beerController extends Controller_Rest
 	public function delete_index($id = null)
 	{
 		$user_id = Session::get('user_id');
+
+		$data = json_decode(file_get_contents('php://input'), true);
+
+		if (!Security::check_token(@$data['csrf_token'])) {
+			return $this->response(['error' => 'Invalid CSRF Token'], 403);
+		}
+
+
 		if (!$id) {
 			return $this->response(['error' => 'ID is required'], 400);
 		}
@@ -188,6 +218,7 @@ class Controller_Api_beerController extends Controller_Rest
 			return $this->response(['error' => 'Unauthorized'], 403);
 		}
 
+		//削除されたデータを保存するアーカイブ用
 		$archive = Model_BeerArchive::forge([
 			'beer_id'      => $beer->id,
 			'user_id'      => $beer->user_id,
@@ -207,7 +238,7 @@ class Controller_Api_beerController extends Controller_Rest
 			'deleted_at'   => date('Y-m-d H:i:s'),
 		]);
 		$archive->save();
-
+		//beers tableのdeleted_atを更新
 		$beer->deleted_at = date('Y-m-d H:i:s');
 		$beer->save();
 

@@ -1,0 +1,13 @@
+CSRF(Cross-Site Request Forgery) is an attack that could delete data without the user ever knowing
+to avoid this
+generate a CSRF token and store it in the session
+insert the token in every form
+verify the token when receiving the form
+
+The CSRF token is used to verify that the form submission came from your site.
+
+
+
+X-Frame-Options
+クリックジャッキング対策　（＝別のWebページをページ内に表示するHTMLタグが、悪用されておこる）
+declare that This site cannot be embedded in an iframe.

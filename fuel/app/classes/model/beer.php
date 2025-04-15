@@ -1,5 +1,5 @@
 <?php
-
+//Object-Relational Mapping テーブルのレコードをオブジェクトとして扱う
 class Model_Beer extends \Orm\Model
 {
     protected static $_table_name = 'beers';
@@ -26,7 +26,7 @@ class Model_Beer extends \Orm\Model
         'updated_at',
         'deleted_at',
     ];
-
+    //日付を自動でセット
     protected static $_observers = [
         'Orm\\Observer_CreatedAt' => [
             'events' => ['before_insert'],
@@ -39,7 +39,7 @@ class Model_Beer extends \Orm\Model
             'mysql_timestamp' => true,
         ],
     ];
-
+    //一つのビールが複数のアーカイブを持つ
     protected static $_has_many = [
         'archives' => [
             'key_from' => 'id',
@@ -49,7 +49,7 @@ class Model_Beer extends \Orm\Model
             'cascade_delete' => false,
         ],
     ];
-
+    //ビールは一人のユーザーに属する
     protected static $_belongs_to = [
         'user' => [
             'key_from'       => 'user_id',
