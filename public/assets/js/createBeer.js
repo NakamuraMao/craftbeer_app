@@ -32,6 +32,39 @@ function BeerFormViewModel(){
 
     //フォーム送信字に呼ばれる
     self.submitForm = function() {
+        // 必須項目のチェック
+        if (!self.name() || self.name().length > 255) {
+            alert('Name is required and must be less than 255 characters.');
+            return;
+        }
+        if (!self.brewery() || self.brewery().length > 255) {
+            alert('Brewery is required and must be less than 255 characters.');
+            return;
+        }
+        if (self.type().length > 100) {
+            alert('Type is required and must be less than 100 characters.');
+            return;
+        }
+        if (self.origin().length > 100) {
+            alert('Origin is required and must be less than 100 characters.');
+            return;
+        }
+
+        // 数値のチェック
+        if (isNaN(self.IBU()) || self.IBU() < 0) {
+            alert('IBU must be a valid non-negative number.');
+            return;
+        }
+        if (isNaN(self.ABV()) || self.ABV() < 0 || self.ABV() > 100) {
+            alert('ABV must be between 0 and 100.');
+            return;
+        }
+
+        // 日付のチェック
+        if (self.sampled_date() && isNaN(Date.parse(self.sampled_date()))) {
+            alert('Sampled Date must be a valid date.');
+            return;
+        }
         //event.preventDefault();
         //フォームのデータをbeerData オブジェクトにまとめる
         const beerData = {
@@ -51,28 +84,42 @@ function BeerFormViewModel(){
             user_id: this.user_id(),
             csrf_token: CSRF_TOKEN
         };
-        //サーバー /api/beerにPOST送信
-        fetch('/api/beer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'//JSON形式で送る宣言
-            },
-            body: JSON.stringify(beerData)//実際に送るデータの指定
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Craftbeer successfully added!');
-                location.href = "/beer/index";
-            } else {
-                alert('Failed to add craftbeer,,,');
-            }
-        })
-        .catch(error => {
-            alert('Error occured');
-            console.error(error);
-        });
+        submitBeerData(beerData);
     };
 }
+// データ送信だけ担当する関数
+function submitBeerData(beerData) {
+    fetch('/api/beer', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(beerData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        handleBeerSubmitResponse(data);
+    })
+    .catch(error => {
+        handleBeerSubmitError(error);
+    });
+}
 
+// 成功したときの処理
+function handleBeerSubmitResponse(data) {
+    if (data.success) {
+        alert('Craftbeer successfully added!');
+        location.href = "/beer/index";
+    } else {
+        alert('Failed to add craftbeer...');
+    }
+}
+
+// エラーが起きたときの処理
+function handleBeerSubmitError(error) {
+    alert('Error occurred while submitting craftbeer...');
+    console.error(error);
+}
+
+// KnockoutとViewModelを繋ぐ
 ko.applyBindings(new BeerFormViewModel());//HTMLとJavaScriptを双方向で繋ぐ

@@ -30,14 +30,16 @@ function BeerListViewModel() {
     self.loadBeers = function () {
         //const currentUserId = localStorage.getItem('user_id');
 
-        fetch(`/api/beer`)
-            .then(res => res.json())
+        fetchBeers()
             .then(data => {
-                const mapped = data.map(item => new BeerModel(item));//各アイテムをBeerModelに変換してKnockout用にする
-                self.beers(mapped);//beers配列にセットして画面に反映
+                applyBeerList(self, data);
             })
-            .catch(err => console.error('error:', err));
+            .catch(err => {
+                console.error('Failed to load beers:', err);
+                alert('Error loading craft beers.');
+            });
     };
+
 
     // 登録処理
     /*self.addBeer = function () {
@@ -63,35 +65,67 @@ function BeerListViewModel() {
 
     // 削除処理（APIにDELETEを送る）
     self.deleteBeer = function (beer) {
+        // --- 入力チェックを追加 ---
+        if (!beer || isNaN(beer.id) || parseInt(beer.id) <= 0) {
+            alert('Invalid Beer ID. Cannot proceed with deletion.');
+            return;
+        }
+
         if (!confirm(`You would like to delete ${beer.name()}?`)) {
             return;
         }
-        //ビールのIDをURLに指定してDELETEをリクエストする
-        fetch(`/api/beer/${beer.id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ csrf_token: CSRF_TOKEN }) // CSRF対策トークンを送信
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                self.beers.remove(beer);// 成功したらbeers配列から該当のBeerを削除（画面からも消える）
-                alert('Success to delete!');
-            } else {
-                alert('Failed to delete...');
-                console.error(data.error);
-            }
-        })
-        .catch(err => {
-            alert('An error occured...');
-            console.error(err);
-        });
+        deleteBeerFromServer(beer)
+            .then(data => {
+                handleBeerDeleteSuccess(self, beer, data);
+            })
+            .catch(err => {
+                handleBeerDeleteError(err);
+            });
     };
-    //ページ読み込み時にビール一覧を取得して表示
-    self.loadBeers(); // 初期化時に呼ぶ
 
+    self.loadBeers(); // 初期化時に呼び出し
 }
 
+// APIからビール一覧を取得
+function fetchBeers() {
+    return fetch('/api/beer')
+        .then(res => res.json());
+}
+
+// ビールリストをViewModelにセット
+function applyBeerList(vm, data) {
+    const mapped = data.map(item => new BeerModel(item));
+    vm.beers(mapped);
+}
+
+// サーバーに削除リクエストを送る
+function deleteBeerFromServer(beer) {
+    return fetch(`/api/beer/${beer.id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ csrf_token: CSRF_TOKEN })
+    }).then(res => res.json());
+}
+
+// 削除成功時
+function handleBeerDeleteSuccess(vm, beer, data) {
+    if (data.success) {
+        vm.beers.remove(beer);
+        alert('Successfully deleted!');
+    } else {
+        alert('Failed to delete...');
+        console.error(data.error);
+    }
+}
+
+// 削除エラー時
+function handleBeerDeleteError(error) {
+    alert('An error occurred during deletion...');
+    console.error(error);
+}
+
+// Knockoutとバインド
 ko.applyBindings(new BeerListViewModel());
+        

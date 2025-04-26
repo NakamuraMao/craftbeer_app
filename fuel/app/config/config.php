@@ -10,7 +10,10 @@
  * @link       https://fuelphp.com
  */
 
+ USE Fuel\Core\Fuel;
+
 return array(
+	'log_threshold' => Fuel::L_DEBUG,
 	/**
 	 * -------------------------------------------------------------------------
 	 *  The base URL of the application

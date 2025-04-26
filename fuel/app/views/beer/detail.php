@@ -8,7 +8,7 @@
 <body>
 
     <div class="header">
-        <h1>My <span class="highlight">Beer Journal</span></h1>
+        <h1><?= html_entity_decode($site_name); ?></h1>
     </div>
 
     <div class="detail-container">

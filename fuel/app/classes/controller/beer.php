@@ -5,7 +5,8 @@ use Fuel\Core\Response;
 use Fuel\Core\View;
 use Fuel\Core\Session;
 use Fuel\Core\Input;
-
+use Fuel\Core\Config;
+use Fuel\Core\Log;
 class Controller_Beer extends Controller
 {
 
@@ -13,12 +14,16 @@ class Controller_Beer extends Controller
     public function before()
     {
         parent::before();
+
         //もしsessionでログインユーザーが見つからない場合、loginページへ遷移
         if (!Session::get('user_id')) {
             Response::redirect('/login');
         }
         //X-Frame-Options追加 クリックジャッキング対策
         Response::forge()->set_header('X-Frame-Options', 'DENY', true);
+
+        Config::load('site', true); 
+        View::set_global('site_name', Config::get('site.site_name'));
     }
     //一覧表示ページ
 	public function action_index()

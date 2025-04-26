@@ -41,6 +41,23 @@ function BeerFormViewModel(){
     };
     
 }
+
+// fetchするだけの関数
+function fetchBeerDetail(beerId) {
+    return fetch(`/api/beer/${beerId}`)
+        .then((res) => res.json());
+}
+
+// データをViewModelにセットして画面に反映する関数
+function applyBeerDetail(vm, data) {
+    if (data.error) {
+        alert("Cannot find the craft beer...");
+    } else {
+        vm.loadFromData(data);
+        ko.applyBindings(vm);
+    }
+}
+
 //HTMLが完全に読み込まれた後にこの関数を実行
 document.addEventListener("DOMContentLoaded", function () {
     //クエリパラメータを実施
@@ -48,28 +65,21 @@ document.addEventListener("DOMContentLoaded", function () {
     //urlにidがあったら、beerIDに代入
     const beerId = params.get("id");
 
-    if (!beerId) {
-        alert("Beer ID is not selected...");
+    // 入力のチェック
+    if (!beerId || isNaN(beerId) || parseInt(beerId) <= 0) {
+        alert("Invalid Beer ID. Please access from the beer list.");
         return;
     }
     //HTMLと連動する値を保持するデータモデル
     //vmを通じてdata-bindと繋がる
     const vm = new BeerFormViewModel();
     //取得したビールIDから詳細情報を取得するリクエストを送る
-    fetch(`/api/beer/${beerId}`)
-        .then((res) => res.json())
+    fetchBeerDetail(beerId)
         .then((data) => {
-            if (data.error) {
-                alert("cannot find a craftbeer...");
-            } else {
-                //取得したビールデータをViewModelにセット
-                vm.loadFromData(data);
-                //画面に反映
-                ko.applyBindings(vm);
-            }
+            applyBeerDetail(vm, data);
         })
         .catch((err) => {
-            alert("Failed to get craftbeer information...");
+            alert("Failed to get craft beer information...");
             console.error(err);
         });
 });

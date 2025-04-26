@@ -1,5 +1,6 @@
 <?php
-use Fuel\Core\Security; ?>
+use Fuel\Core\Security; 
+use Fuel\Core\View; ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +12,7 @@ use Fuel\Core\Security; ?>
 <body>
 
     <div class="header">
-        <h1>My <span class="highlight">Beer Journal</span></h1>
+        <h1><?= html_entity_decode($site_name); ?></h1>
     </div>
 
     <div class="container">

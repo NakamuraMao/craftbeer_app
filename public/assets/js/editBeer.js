@@ -47,6 +47,39 @@ function BeerFormViewModel() {
 }
 //フォームが送信された時に呼ばれる関数
 BeerFormViewModel.prototype.submitForm = function () {
+    // ① 必須項目のチェック
+    if (!self.name() || self.name().length > 255) {
+        alert('Name is required and must be less than 255 characters.');
+        return;
+    }
+    if (!self.brewery() || self.brewery().length > 255) {
+        alert('Brewery is required and must be less than 255 characters.');
+        return;
+    }
+    if (self.type().length > 100) {
+        alert('Type is required and must be less than 100 characters.');
+        return;
+    }
+    if (self.origin().length > 100) {
+        alert('Origin is required and must be less than 100 characters.');
+        return;
+    }
+
+    // 数値のチェック
+    if (isNaN(self.IBU()) || self.IBU() < 0) {
+        alert('IBU must be a valid non-negative number.');
+        return;
+    }
+    if (isNaN(self.ABV()) || self.ABV() < 0 || self.ABV() > 100) {
+        alert('ABV must be between 0 and 100.');
+        return;
+    }
+
+    // 日付のチェック
+    if (self.sampled_date() && isNaN(Date.parse(self.sampled_date()))) {
+        alert('Sampled Date must be a valid date.');
+        return;
+    }
     const beerData = {
         id: this.id(),
         name: this.name(),
@@ -65,29 +98,60 @@ BeerFormViewModel.prototype.submitForm = function () {
         //user_id: this.user_id(),
         csrf_token: CSRF_TOKEN// CSRF対策トークン
     };
-//PUTメソッドでビールデータを更新するAPIへリクエスト送信
+    submitBeerData(beerData);
+};
+
+// IDでビールデータ取得するだけの関数
+function fetchBeerDetail(beerId) {
+    return fetch(`/api/beer/${beerId}`)
+        .then(res => res.json());
+}
+
+// データをViewModelに反映するだけの関数
+function applyBeerDetail(vm, data) {
+    if (data.error) {
+        alert("Cannot find the craftbeer...");
+    } else {
+        vm.loadFromData(data);
+        ko.applyBindings(vm);
+    }
+}
+
+// PUTでビールデータ送信する関数
+function submitBeerData(beerData) {
     fetch('/api/beer', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(beerData)//JSONに変換
+        body: JSON.stringify(beerData)
     })
-        .then(res => res.json())//responseをJSONに変換
-        .then(data => {
-            if (data.success) {
-                alert("Completed!");
-                window.location.href = "/beer/detail?id=" + this.id(); // 編集後に詳細ページへ戻る
-            } else {
-                alert("Failed to update...");
-            }
-        })
-        .catch(err => {
-            alert("An error occured!");
-            console.error(err);
-        });
-};
-//HTMLが完全に読み込まれたら実行される関数
+    .then(res => res.json())
+    .then(data => {
+        handleBeerUpdateResponse(data, beerData.id);
+    })
+    .catch(err => {
+        handleBeerUpdateError(err);
+    });
+}
+
+// 成功時の処理
+function handleBeerUpdateResponse(data, beerId) {
+    if (data.success) {
+        alert("Completed!");
+        window.location.href = `/beer/detail?id=${beerId}`;
+    } else {
+        alert("Failed to update...");
+    }
+}
+
+// エラー時の処理
+function handleBeerUpdateError(err) {
+    alert("An error occurred!");
+    console.error(err);
+}
+
+// ページロード後の初期処理
 document.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     const beerId = params.get("id");
@@ -99,14 +163,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const vm = new BeerFormViewModel();
 
-    fetch(`/api/beer/${beerId}`)
-        .then(res => res.json())
+    fetchBeerDetail(beerId)
         .then(data => {
-            vm.loadFromData(data);
-            ko.applyBindings(vm);
+            applyBeerDetail(vm, data);
         })
         .catch(err => {
-            alert("Error to load...");
+            alert("Error to load craftbeer...");
             console.error(err);
         });
 });
