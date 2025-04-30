@@ -100,6 +100,7 @@ class Controller_Api_beerController extends Controller_Rest
 	public function post_index()
 	{
 		//フロントからのJSONデータを配列で格納する
+		//FuelPHPでAPIを受け取るとき、フロントエンドからJSONデータを送ってくるからそれをPHPで使える形にしている
 		$data = json_decode(file_get_contents('php://input'), true);
 		$user_id = Session::get('user_id');
 
@@ -121,7 +122,7 @@ class Controller_Api_beerController extends Controller_Rest
 			'user_id' => $user_id,
             'name' => $data['name'],
             'brewery' => $data['brewery'],  // ブランド名
-			//isset：キーがあるか　$data['']があればその値をセット　なければnull
+			//isset キーがあるか　$data['']があればその値をセット　なければnull
             'type' => isset($data['type']) ? $data['type'] : null,  // 種類
             'IBU' => isset($data['IBU']) ? $data['IBU'] : null,  // 苦味
             'ABV' => isset($data['ABV']) ? $data['ABV'] : null,  // アルコール度数

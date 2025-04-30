@@ -65,7 +65,7 @@ function BeerListViewModel() {
 
     // 削除処理（APIにDELETEを送る）
     self.deleteBeer = function (beer) {
-        // --- 入力チェックを追加 ---
+        //  入力チェックを追加 
         if (!beer || isNaN(beer.id) || parseInt(beer.id) <= 0) {
             alert('Invalid Beer ID. Cannot proceed with deletion.');
             return;

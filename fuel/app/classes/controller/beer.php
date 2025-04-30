@@ -45,11 +45,11 @@ class Controller_Beer extends Controller
     //編集ページ
 	public function action_edit()
     {
-        $user_id = Session::get('user_id');
+        //$user_id = Session::get('user_id');
         $beer_id = Input::get('id');
         // Rendering the create.php view where the registration form is located
         return Response::forge(View::forge('beer/edit')
-            ->set('user_id', $user_id)
+            //->set('user_id', $user_id)
             ->set('beer_id', $beer_id)
         );
     }

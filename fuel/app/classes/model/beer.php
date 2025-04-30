@@ -1,5 +1,6 @@
 <?php
 //Object-Relational Mapping テーブルのレコードをオブジェクトとして扱う
+//\Orm\Model DBのテーブル1つをクラス1つにマッピングするための基本クラス
 class Model_Beer extends \Orm\Model
 {
     protected static $_table_name = 'beers';

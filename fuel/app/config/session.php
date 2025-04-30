@@ -8,6 +8,6 @@ return [
     'cookie_path' => '/',
     'cookie_domain' => '',
     'cookie_secure' => true, // HTTPS限定
-    'cookie_http_only' => true, // JSからのアクセス不可
-    'cookie_same_site' => 'Lax', // or 'Strict'
+    'cookie_http_only' => true, // JSからのアクセス不可 (XSS対策)
+    'cookie_same_site' => 'Lax', // or 'Strict'　外部からのPOSTを制限（CSRF対策）
 ];

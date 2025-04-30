@@ -30,7 +30,8 @@ class Controller_Api_User extends Controller_Rest
 			return $this->response(['status'=>'error', 'message'=>'Missing required fields'], 404);
 		}
         //登録されたemailがすでにDBにあるか確認
-        $existing = DB::select('email')->from('users')->where('email', $data['email'])->execute()->current();
+        //$existing = DB::select('email')->from('users')->where('email', $data['email'])->execute()->current();
+        $existing = Model_User::query('email')->where('email', $data['email'])->get_one();
         if($existing){
             return $this->response(['status' => 'error', 'message' => 'Email already exists'], 409);
         }

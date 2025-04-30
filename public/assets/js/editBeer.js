@@ -47,7 +47,8 @@ function BeerFormViewModel() {
 }
 //フォームが送信された時に呼ばれる関数
 BeerFormViewModel.prototype.submitForm = function () {
-    // ① 必須項目のチェック
+    const self = this;
+    // 必須項目のチェック
     if (!self.name() || self.name().length > 255) {
         alert('Name is required and must be less than 255 characters.');
         return;
